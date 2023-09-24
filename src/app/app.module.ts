@@ -93,8 +93,8 @@ import { CardModule } from 'primeng/card';
 import { BlockUIModule } from 'primeng/blockui';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AppComponent } from './app.component';
-import { MyOverlayDropdownComponent } from './my-overlay-dropdown/my-overlay-dropdown.component';
 import { MyDropdownModule } from './demo/my-dropdown.module';
+import { MyOverlayDropdownModule } from './my-overlay-dropdown/my-overlay-dropdown.module';
 
 @NgModule({
   imports: [
@@ -191,8 +191,9 @@ import { MyDropdownModule } from './demo/my-dropdown.module';
     AnimateModule,
     CardModule,
     MyDropdownModule,
+    MyOverlayDropdownModule,
   ],
-  declarations: [AppComponent, MyOverlayDropdownComponent],
+  declarations: [AppComponent],
   bootstrap: [AppComponent],
   providers: [],
 })
