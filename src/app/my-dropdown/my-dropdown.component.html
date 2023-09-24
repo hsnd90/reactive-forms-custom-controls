@@ -1,0 +1,32 @@
+<p-dropdown
+  *ngIf="options && optionLabel && optionValue"
+  [options]="options"
+  [(ngModel)]="selectedOption"
+  (ngModelChange)="onChangeFunc($event)"
+  [optionLabel]="optionLabel"
+  [filter]="true"
+  [filterBy]="optionLabel"
+  [showClear]="true"
+  [placeholder]="placeholder"
+  [autoDisplayFirst]="false"
+  [disabled]="disabled || isDisabled"
+  [class.ng-invalid]="controlValid == false"
+  [ngClass]="classVal"
+  [appendTo]="'body'"
+  (onChange)="onDropdownChanged($event)"
+>
+  <ng-template pTemplate="selectedItem">
+    <div class="flex align-items-center gap-2 asd">
+      <div>{{ selectedOption[optionLabel] }}</div>
+    </div>
+  </ng-template>
+  <ng-template let-option pTemplate="item">
+    <div class="flex align-items-center gap-2">
+      <div>{{ option[optionLabel] }}</div>
+    </div>
+  </ng-template>
+</p-dropdown>
+
+<p *ngIf="!options || !optionLabel || !optionValue">
+  Dropdown için options , optionLabel ve optionValue değerlerini tanımlayınız
+</p>
