@@ -3,21 +3,20 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  Host,
   Injector,
   Input,
   OnChanges,
   OnInit,
+  Optional,
   Output,
+  Self,
   SimpleChanges,
   ViewChild,
   ViewEncapsulation,
   forwardRef,
 } from '@angular/core';
-import {
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-  NgControl,
-} from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, ValidationErrors, Validator } from '@angular/forms';
 import { OverlayPanel } from 'primeng/overlaypanel';
 import { MyOverlayDropdownConfig } from './my-overlay-dropdown-config';
 
@@ -31,35 +30,35 @@ import { MyOverlayDropdownConfig } from './my-overlay-dropdown-config';
       multi: true,
       useExisting: forwardRef(() => MyOverlayDropdownComponent),
     },
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => MyOverlayDropdownComponent), multi: true },
   ],
   encapsulation: ViewEncapsulation.None,
 })
-export class MyOverlayDropdownComponent
-  implements ControlValueAccessor, AfterViewInit, OnChanges, OnInit
-{
+export class MyOverlayDropdownComponent implements ControlValueAccessor, AfterViewInit, OnChanges, OnInit, Validator {
   selectedVal: any;
   selectedData: any;
   totalRecords: number;
   datas: any[];
   ngControl: NgControl;
+  control: any;
   controlValid: boolean = true;
   disabled: boolean = false;
   @Input() config: MyOverlayDropdownConfig;
   @Input() options: any[];
   @ViewChild('op') overlayPanel: OverlayPanel;
   @Input() isDisabled: boolean = false;
-  @Input() columns: [
-    {
-      label: string;
-      type: 'text' | 'numeric' | 'image';
-      field: string;
-    }
-  ];
   @Output() onChanged: EventEmitter<any> = new EventEmitter();
   onChange = (option: any) => {};
   onTouched = () => {};
 
-  constructor(private cd: ChangeDetectorRef, private injector: Injector) {}
+  constructor(private cd: ChangeDetectorRef) {}
+
+  validate(control: AbstractControl<any, any>): ValidationErrors | null {
+    if (!this.control) {
+      this.control = control;
+    }
+    return null;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.options) {
@@ -68,13 +67,12 @@ export class MyOverlayDropdownComponent
       this.writeValue(this.selectedVal);
     }
 
-    if (changes.disabled) {
+    if (changes['disabled']) {
       this.setDisabledState(this.disabled);
     }
   }
 
   ngOnInit(): void {
-    this.ngControl = this.injector.get(NgControl);
     this.checkValid();
   }
 
@@ -85,9 +83,7 @@ export class MyOverlayDropdownComponent
   writeValue(obj: any): void {
     this.selectedVal = obj;
     if (this.datas && obj) {
-      this.selectedData = this.options.find(
-        (x) => x[this.config.optionValue] == obj
-      );
+      this.selectedData = this.options.find((x) => x[this.config.optionValue] == obj);
     } else if (this.datas && !obj) {
       this.selectedData = null;
     }
@@ -99,12 +95,14 @@ export class MyOverlayDropdownComponent
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
   }
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
   }
 
   checkValid() {
-    this.controlValid = this.ngControl?.valid && this.ngControl.touched;
+    if (this.control) {
+      this.controlValid = this.control.valid;
+    }
   }
 
   onSelectItem(data: any) {
@@ -124,12 +122,11 @@ export class MyOverlayDropdownComponent
 
   onClick(event: any) {
     if (this.disabled || this.isDisabled) return;
-    this.onChange(null);
     this.overlayPanel.toggle(event);
     this.markAsTouched();
   }
 
-  onDropdownChanged(event) {
+  onDropdownChanged(event: any) {
     this.markAsTouched();
     this.onChange(event.value);
   }

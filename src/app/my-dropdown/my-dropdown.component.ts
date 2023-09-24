@@ -11,11 +11,7 @@ import {
   SimpleChanges,
   forwardRef,
 } from '@angular/core';
-import {
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-  NgControl,
-} from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, ValidationErrors, Validator } from '@angular/forms';
 
 @Component({
   selector: 'lib-my-dropdown',
@@ -26,15 +22,21 @@ import {
       multi: true,
       useExisting: forwardRef(() => MyDropdownComponent),
     },
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => MyDropdownComponent), multi: true },
   ],
 })
-export class MyDropdownComponent
-  implements OnInit, AfterViewInit, ControlValueAccessor, OnChanges
-{
+export class MyDropdownComponent implements OnInit, AfterViewInit, ControlValueAccessor, OnChanges, Validator {
   constructor(private cd: ChangeDetectorRef, private injector: Injector) {}
+  validate(control: AbstractControl<any, any>): ValidationErrors | null {
+    if (!this.control) {
+      this.control = control;
+    }
+    return null;
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.disabled) {
-      this.disabled = changes.disabled['currentValue'];
+    if (changes['disabled']) {
+      this.disabled = changes['disabled']['currentValue'];
     }
   }
   ngAfterViewInit(): void {
@@ -46,6 +48,7 @@ export class MyDropdownComponent
   selectedOption: any;
   selectedVal: any;
   ngControl: NgControl;
+  control: any;
   controlValid: boolean = true;
   touched: boolean = false;
   @Input() options: any[];
@@ -79,7 +82,9 @@ export class MyDropdownComponent
   }
 
   checkValid() {
-    this.controlValid = this.ngControl?.valid && this.ngControl.touched;
+    if (this.control) {
+      this.controlValid = this.control.valid;
+    }
   }
 
   markAsTouched() {
@@ -87,12 +92,10 @@ export class MyDropdownComponent
     this.checkValid();
   }
 
-  onChangeFunc(event) {
+  onChangeFunc(event: any) {
     this.onChanged.emit(event);
     if (event) {
-      this.selectedVal = this.options.find(
-        (x) => x[this.optionValue] == event[this.optionValue]
-      );
+      this.selectedVal = this.options.find((x) => x[this.optionValue] == event[this.optionValue]);
       this.onChange(this.selectedVal[this.optionValue]);
     } else {
       this.onChange(null);
@@ -101,7 +104,7 @@ export class MyDropdownComponent
     this.markAsTouched();
   }
 
-  onDropdownChanged(event) {
+  onDropdownChanged(event: any) {
     this.markAsTouched();
   }
 }

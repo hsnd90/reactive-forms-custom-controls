@@ -19,7 +19,6 @@
   [showCloseIcon]="true"
   [style]="{ width: '500px' }"
   [styleClass]="'my-overlay-dropdown'"
-  [dismissable]="false"
 >
   <ng-template pTemplate>
     <p-table
@@ -28,7 +27,6 @@
       [paginator]="true"
       [rows]="config.rowsPerPage"
       [totalRecords]="totalRecords"
-      [emptyFilterMessage]="'Kayıt Bulunamadı'"
     >
       <ng-template pTemplate="header">
         <tr>
@@ -40,7 +38,7 @@
           <th *ngFor="let col of config?.columns">
             <p-columnFilter
               *ngIf="col.type == 'text'"
-              [matchMode]="contains"
+              matchMode="contains"
               [showMatchModes]="false"
               [showOperator]="false"
               type="text"
@@ -50,7 +48,7 @@
             ></p-columnFilter>
             <p-columnFilter
               *ngIf="col.type == 'number'"
-              [matchMode]="equals"
+              matchMode="equals"
               [showMatchModes]="false"
               [showOperator]="false"
               type="numeric"
@@ -67,7 +65,7 @@
             <div *ngIf="col.type == 'text'">
               {{ item[col.field] }}
             </div>
-            <div *ngIf="col.type == 'numeric'">
+            <div *ngIf="col.type == 'number'">
               {{ item[col.field] }}
             </div>
             <div *ngIf="col.type == 'image'">
